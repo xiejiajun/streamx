@@ -67,9 +67,11 @@ public class NoteBookServiceImpl implements NoteBookService {
         executorService.execute(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
             try {
+                // TODO 这里抄了Zeppelin的FlinkInterpreter写法
                 FlinkVersion flinkVersion = flinkVersionService.getDefault();
                 interpreter.open(flinkVersion.getFlinkHome());
                 InterpreterOutput out = new InterpreterOutput(log::info);
+                // FlinkInterpreter.interpret - > FlinkScalaInterpreter.interpret
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
                 log.info("repl submit code:" + result.code());
                 if (result.code().equals(InterpreterResult.ERROR())) {

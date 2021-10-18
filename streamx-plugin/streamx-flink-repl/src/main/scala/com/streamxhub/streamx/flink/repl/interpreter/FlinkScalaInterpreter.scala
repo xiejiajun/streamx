@@ -81,6 +81,7 @@ class FlinkScalaInterpreter(properties: Properties) {
 
   def open(flinkHome: String): Unit = {
     val config = initFlinkConfig(flinkHome)
+    // TODO 创建和Flink Job交互的FlinkILoop
     createFlinkILoop(config)
     val modifiers = new ArrayBuffer[String]
     modifiers + "@transient"
