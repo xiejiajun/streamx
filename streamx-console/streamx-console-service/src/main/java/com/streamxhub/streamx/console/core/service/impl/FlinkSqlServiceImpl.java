@@ -190,12 +190,14 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public SqlError verifySql(String sql, Long versionId) {
+        // TODO 通过不同的ClassLoader加载不同Flink版本的shim
         ClassLoader loader = getFlinkShimsClassLoader(versionId);
         String error = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<String>) () -> {
             try {
                 Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
                 Method method = clazz.getDeclaredMethod("verifySql", String.class);
                 method.setAccessible(true);
+                // TODO SQL校验
                 Object sqlError = method.invoke(null, sql);
                 if (sqlError == null) {
                     return null;
