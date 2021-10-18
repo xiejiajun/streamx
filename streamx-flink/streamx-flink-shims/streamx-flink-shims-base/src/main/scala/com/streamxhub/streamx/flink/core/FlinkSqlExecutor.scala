@@ -72,6 +72,7 @@ object FlinkSqlExecutor extends Logger {
   }
 
   private[streamx] def executeSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
+    // TODO 传入sql的key为null时， 从ParameterTool里面获取key为sql的SQL语句来执行
     val flinkSql: String = if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(flinkSql != null && flinkSql.trim.nonEmpty, sqlEmptyError)
@@ -85,6 +86,7 @@ object FlinkSqlExecutor extends Logger {
 
     //TODO registerHiveCatalog
     val insertArray = new ArrayBuffer[String]()
+    // TODO 根据不同的SQL类型调用不同的SQL执行方法
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
       val args = x.operands.head
       val command = x.command.name

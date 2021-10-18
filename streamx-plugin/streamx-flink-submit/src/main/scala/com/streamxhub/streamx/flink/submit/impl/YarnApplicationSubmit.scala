@@ -59,6 +59,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
 
     val uri = PackagedProgramUtils.resolveURI(submitRequest.flinkUserJar)
 
+    // TODO 生成不同版本Flink的提交配置: 通过将不同版本的Flink库上传到HDFS指定路径来实现提交任务是使用对应版本
     val flinkConfig = getEffectiveConfiguration(submitRequest, activeCommandLine, commandLine, Collections.singletonList(uri.toString))
 
     SecurityUtils.install(new SecurityConfiguration(flinkConfig))
@@ -78,6 +79,23 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
 
           val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
           var applicationId: ApplicationId = null
+          // TODO 提交任务（以SQL任务为例)：
+          //  com.streamxhub.streamx.flink.cli.SqlClient.main -> com.streamxhub.streamx.flink.core.scala.FlinkStreamTable.main
+          //  -> com.streamxhub.streamx.flink.core.scala.FlinkStreamTable.init
+          //    -> com.streamxhub.streamx.flink.core.FlinkTableInitializer.initStreamTable
+          //    -> com.streamxhub.streamx.flink.core.FlinkTableInitializer.initParameter
+          //    -> ParameterTool.fromArgs(args)：这里面的Utils.getKeyFromArgs会将getEffectiveConfiguration里面设置的--sql、--conf、--app.name等option转换成key为
+          //       sql、conf、app.name的Map
+          //    -> FlinkStreamTable.context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, configStream, configTable))
+          //  -> com.streamxhub.streamx.flink.cli.SqlClient.handle -> context.sql()
+          //    -> com.streamxhub.streamx.flink.core.FlinkStreamTableTrait.sql
+          //    -> com.streamxhub.streamx.flink.core.FlinkSqlExecutor.executeSql: 由于传入的sql的key为null，所以会从ParameterTool里面获取key为sql的SQL语句来执行，
+          //       也就是会执行上面从配置中解析出来的sql
+          //    -> org.apache.flink.table.api.internal.StatementSetImpl.execute / org.apache.flink.table.api.internal.TableEnvironmentImpl.executeSql
+          //  -> com.streamxhub.streamx.flink.core.FlinkStreamTableTrait.start
+          //    -> com.streamxhub.streamx.flink.core.FlinkStreamTableTrait.execute
+          //    -> TableEnvironmentImpl.executeInternal(java.util.List<org.apache.flink.table.operations.ModifyOperation>)
+          //    -> ... -> 触发Flink任务提交
           val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
           applicationId = clusterClient.getClusterId
 
@@ -170,6 +188,8 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
     //flinkDistJar
     effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
     //pipeline.jars
+    // TODO 设置MainClass所在的Jar包, Sql任务提交使用的jar是在ApplicationServiceImpl.start中设置的包含
+    //  com.streamxhub.streamx.flink.cli.SqlClient的streamx-flink-sqlclient-xxx.jar
     effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
     //execution.target
     effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)

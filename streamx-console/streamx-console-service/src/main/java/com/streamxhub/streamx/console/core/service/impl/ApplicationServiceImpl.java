@@ -1097,6 +1097,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //1) dist_userJar
             File localPlugins = new File(WebUtils.getAppDir("plugins"));
             assert localPlugins.exists();
+            // TODO 获取用于提交SQL的MainClass com.streamxhub.streamx.flink.cli.SqlClient所在的Jar
             List<String> jars =
                     Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
                             .collect(Collectors.toList());
@@ -1216,6 +1217,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         log.setStartTime(new Date());
 
         try {
+            // TODO 任务提交入口
             SubmitResponse submitResponse = FlinkSubmit.submit(submitInfo);
             if (submitResponse.flinkConfig() != null) {
                 String jmMemory = submitResponse.flinkConfig().toMap().get(ConfigurationOptions.KEY_TOTAL_PROCESS_MEMORY);
