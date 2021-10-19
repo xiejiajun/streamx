@@ -28,7 +28,6 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkVersion;
-import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -55,12 +54,12 @@ import static com.streamxhub.streamx.common.enums.StorageType.LFS;
 public class EnvInitializer implements ApplicationRunner {
 
     @Autowired
-    private SettingService settingService;
-
-    @Autowired
     private ApplicationContext context;
 
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
+
+    private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
+            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -137,11 +136,10 @@ public class EnvInitializer implements ApplicationRunner {
             if (fsOperator.exists(appShims)) {
                 fsOperator.delete(appShims);
             }
-            String regex = "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$";
-            Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(regex));
+
+            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
             for (File file : Objects.requireNonNull(shims)) {
-                Matcher matcher = pattern.matcher(file.getName());
+                Matcher matcher = PATTERN_FLINK_SHIMS_JAR.matcher(file.getName());
                 if (!keepFile.equals(file.getName()) && matcher.matches()) {
                     String version = matcher.group(1);
                     String shimsPath = appShims.concat("/flink-").concat(version);
@@ -180,6 +178,5 @@ public class EnvInitializer implements ApplicationRunner {
             fsOperator.upload(flinkLocalHome, flinkHome, false, false);
         }
     }
-
 
 }
