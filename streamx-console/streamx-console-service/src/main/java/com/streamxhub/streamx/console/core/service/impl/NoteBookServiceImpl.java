@@ -21,9 +21,9 @@
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.common.util.ThreadUtils;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.Note;
-import com.streamxhub.streamx.console.core.service.FlinkVersionService;
+import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.NoteBookService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.flink.repl.interpreter.FlinkInterpreter;
@@ -49,7 +49,7 @@ public class NoteBookServiceImpl implements NoteBookService {
     private SettingService settingService;
 
     @Autowired
-    private FlinkVersionService flinkVersionService;
+    private FlinkEnvService flinkEnvService;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -68,8 +68,8 @@ public class NoteBookServiceImpl implements NoteBookService {
             FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
             try {
                 // TODO 这里抄了Zeppelin的FlinkInterpreter写法
-                FlinkVersion flinkVersion = flinkVersionService.getDefault();
-                interpreter.open(flinkVersion.getFlinkHome());
+                FlinkEnv flinkEnv = flinkEnvService.getDefault();
+                interpreter.open(flinkEnv.getFlinkHome());
                 InterpreterOutput out = new InterpreterOutput(log::info);
                 // FlinkInterpreter.interpret - > FlinkScalaInterpreter.interpret
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
