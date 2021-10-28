@@ -65,6 +65,7 @@ object FlinkShimsProxy extends Logger {
    * @return
    */
   def proxy[T](flinkVersion: FlinkVersion, func: ClassLoader => T): T = {
+    // TODO 通过不同的ClassLoader加载不同Flink版本的shim
     val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
     ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }

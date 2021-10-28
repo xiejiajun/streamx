@@ -12,6 +12,7 @@ object FlinkSqlHelper extends Logger {
         val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator")
         val method = clazz.getDeclaredMethod("verifySql", classOf[String])
         method.setAccessible(true)
+        // TODO SQL校验
         val sqlError = method.invoke(null, sql)
         if (sqlError == null) null
         else sqlError.toString
