@@ -1281,6 +1281,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     kubernetesSubmitParam
             );
 
+            // TODO 这一行是为了让当前类加载器先加载HdfsWorkspace.class? 解决跨ClassLoader
+            //  ConfigHub在submit模块获取配置返回默认值问题 ?
+            submitRequest.hdfsWorkspace();
             SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);
 
             assert submitResponse != null;
