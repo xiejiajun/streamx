@@ -1283,6 +1283,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             // TODO 这一行是为了让当前类加载器先加载HdfsWorkspace.class? 解决跨ClassLoader
             //  ConfigHub在submit模块获取配置返回默认值问题 ?
+            // TODO 真正的解决方案请看:
+            //      [hotfix] configHub get value related bug fixes bug. #652
+            //      https://github.com/streamxhub/streamx/pull/652/files
             submitRequest.hdfsWorkspace();
             SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);
 
