@@ -108,7 +108,9 @@ object ConfigConst {
 
   val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
 
-  val KEY_FLINK_APP_NAME = "yarn.application.name"
+  val KEY_FLINK_APP_NAME = "pipeline.name"
+
+  val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
   val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
 
@@ -195,7 +197,11 @@ object ConfigConst {
 
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
 
-  val REDIS_PREFIX = "redis."
+  val REDIS_PREFIX = "redis.sink"
+
+  val REDIS_CONNECT_TYPE = "connectType"
+
+  val DEFAULT_REDIS_CONNECT_TYPE = "jedisPool"
 
   val KEY_ALIAS = "alias"
 
@@ -352,7 +358,7 @@ object ConfigConst {
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx  ")
     println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
-    println("       Ver    :  1.2.1                                  ")
+    println("       Ver    :  1.2.2                                  ")
     println(s"       Info   :  $info                                 ")
     println(s"       Time   :  ${LocalDateTime.now}              \n\n")
   }

@@ -147,7 +147,7 @@
         </a-form-item>
       </template>
 
-      <template v-if="resourceFrom == 1">
+      <template v-if="resourceFrom === 1">
         <a-form-item
           label="Project"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -558,6 +558,20 @@
         </p>
       </a-form-item>
 
+      <template v-if="executionMode === 4">
+        <a-form-item
+          label="Yarn Queue"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            allowClear
+            placeholder="Please enter yarn queue"
+            v-decorator="[ 'yarnQueue']">
+          </a-input>
+        </a-form-item>
+      </template>
+
       <a-form-item
         label="Dynamic Option"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -570,7 +584,7 @@
         <p class="conf-desc">
           <span class="note-info">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, e.g: <span class="note-elem">yarn.application.queue=flink</span>, Allows specifying multiple generic configuration options. The available options can be found
+            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, Allows specifying multiple generic configuration options. The available options can be found
             <a href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html" target="_blank">here</a>
           </span>
         </p>
@@ -689,9 +703,9 @@ export default {
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
         {mode: 'local (coming soon)', value: 0, disabled: true},
-        {mode: 'standalone (coming soon)', value: 1, disabled: true},
+        {mode: 'standalone', value: 1, disabled: false},
         {mode: 'yarn session (coming soon)', value: 3, disabled: true},
-        {mode: 'yarn pre-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
+        {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },
@@ -777,10 +791,11 @@ export default {
     handleGet(appId) {
       get({ id: appId }).then((resp) => {
         this.app = resp.data
-        this.versionId = this.app.versionId
+        this.versionId = this.app.versionId || null
+        this.executionMode = this.app.executionMode
         this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.resourceFrom = this.app.resourceFrom
-        if (this.resourceFrom == 1) {
+        if (this.resourceFrom === 1) {
           jars({
             id: this.app.projectId,
             module: this.app.module
@@ -995,6 +1010,7 @@ export default {
               mainClass: values.mainClass,
               args: values.args,
               options: JSON.stringify(options),
+              yarnQueue: this.handleYarnQueue(values),
               cpMaxFailureInterval: values.cpMaxFailureInterval || null,
               cpFailureRateInterval: values.cpFailureRateInterval || null,
               cpFailureAction: values.cpFailureAction || null,
@@ -1008,7 +1024,6 @@ export default {
               flinkImage: values.flinkImage || null,
               resourceFrom: this.resourceFrom
             }
-
             if (params.executionMode === 6) {
               params.k8sPodTemplate = this.podTemplate
               params.k8sJmPodTemplate = this.jmPodTemplate
@@ -1018,6 +1033,16 @@ export default {
           }
         }
       })
+    },
+
+    handleYarnQueue(values) {
+      if ( this.executionMode === 4 ) {
+        const queue = values['yarnQueue']
+        if (queue != null && queue !== '' && queue !== undefined) {
+          return queue
+        }
+        return null
+      }
     },
 
     handleFormValue(values) {
@@ -1077,12 +1102,13 @@ export default {
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
           'executionMode': this.app.executionMode,
+          'yarnQueue': this.app.yarnQueue,
           'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail,
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
           'cpFailureAction': this.app.cpFailureAction,
-          'versionId': this.app.versionId,
+          'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,
           'clusterId': this.app.clusterId,
           'flinkImage': this.app.flinkImage,
