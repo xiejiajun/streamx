@@ -206,10 +206,20 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     flinkConfig
   }
 
-  private[submit] implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {
-    def safeSet(option: ConfigOption[String], value: String): Configuration = {
+//  private[submit] implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {
+//    def safeSet(option: ConfigOption[String], value: String): Configuration = {
+//      flinkConfig match {
+//        case x if StringUtils.isNotBlank(value) => x.set(option, value)
+//        case x => x
+//      }
+//    }
+//  }
+
+  // TODO 上面的隐式类的增强，升级到支持所有类型的配置的安全设置
+  implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {
+    def safeSet[T](option: ConfigOption[T], value: T): Configuration = {
       flinkConfig match {
-        case x if StringUtils.isNotBlank(value) => x.set(option, value)
+        case x if value != null && value.toString.nonEmpty => x.set(option, value)
         case x => x
       }
     }
