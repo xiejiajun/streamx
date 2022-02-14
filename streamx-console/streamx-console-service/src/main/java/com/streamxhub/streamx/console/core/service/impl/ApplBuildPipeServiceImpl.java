@@ -127,6 +127,7 @@ public class ApplBuildPipeServiceImpl
             app.setDependency(flinkSql.getDependency());
         }
 
+        // TODO build pipeline(非常优质的设计)
         // create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
@@ -179,6 +180,7 @@ public class ApplBuildPipeServiceImpl
         DOCKER_BUILD_PG_SNAPSHOTS.invalidate(app.getId());
         DOCKER_PUSH_PG_SNAPSHOTS.invalidate(app.getId());
         // async launch pipeline
+        // TODO 异步启动build pipeline
         executorService.submit((Runnable) pipeline::launch);
         return saved;
     }

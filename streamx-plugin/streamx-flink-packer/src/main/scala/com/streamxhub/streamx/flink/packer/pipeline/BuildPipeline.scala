@@ -123,6 +123,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     this
   }
 
+  // TODO [scala中“=>”的4种使用场景](https://www.cnblogs.com/wjunge/p/10043079.html)
   protected def execStep[R](seq: Int)(process: => R): Option[R] = {
     Try {
       curStep = seq
