@@ -70,6 +70,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
   //noinspection DuplicatedCode
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
+      // TODO trackingTask是Job状态监听器的启动入口
       timerSchedule = timerExec.scheduleAtFixedRate(() => trackingTask(), 0, conf.sglTrkTaskIntervalSec, TimeUnit.SECONDS)
       isStarted = true
       logInfo("[flink-k8s] FlinkJobStatusWatcher started.")

@@ -61,6 +61,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
   // noinspection DuplicatedCode
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
+      // TODO trackingTask是k8s应用指标监听其的启动入口
       timerSchedule = timerExec.scheduleAtFixedRate(() => trackingTask(), 0, conf.sglTrkTaskIntervalSec, TimeUnit.SECONDS)
       isStarted = true
       logInfo("[flink-k8s] FlinkMetricWatcher started.")
