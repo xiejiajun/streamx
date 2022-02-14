@@ -82,6 +82,7 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
 
   private def prepareEventWatcher(k8sClient: KubernetesClient): Unit = {
     // watch k8s deployment events
+    // TODO 注册k8s 事件监听器
     k8sClient.apps().deployments()
       .withLabel("type", "flink-native-kubernetes")
       .watch(new CompatibleKubernetesWatcher[Deployment, CompKubernetesDeployment] {
