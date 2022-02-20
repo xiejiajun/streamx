@@ -36,7 +36,7 @@ public enum ExecutionMode implements Serializable {
     /**
      * remote
      */
-    STANDALONE(1, "remote"),
+    REMOTE(1, "remote"),
     /**
      * yarn-per-job mode
      */
@@ -58,8 +58,9 @@ public enum ExecutionMode implements Serializable {
      */
     KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
 
-    private Integer mode;
-    private String name;
+    private final Integer mode;
+
+    private final String name;
 
     ExecutionMode(Integer mode, String name) {
         this.mode = mode;
@@ -112,12 +113,12 @@ public enum ExecutionMode implements Serializable {
         return Lists.newArrayList(KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
     }
 
-    public static boolean isStandaloneMode(Integer value) {
-        return isStandaloneMode(of(value));
+    public static boolean isRemoteMode(Integer value) {
+        return isRemoteMode(of(value));
     }
 
-    public static boolean isStandaloneMode(ExecutionMode mode) {
-        return STANDALONE.equals(mode);
+    public static boolean isRemoteMode(ExecutionMode mode) {
+        return REMOTE.equals(mode);
     }
 
 }

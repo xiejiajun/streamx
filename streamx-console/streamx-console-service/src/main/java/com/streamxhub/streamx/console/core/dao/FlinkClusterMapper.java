@@ -17,22 +17,19 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.console.core.dao;
 
-import com.streamxhub.streamx.common.conf.K8sFlinkConfig
-import com.streamxhub.streamx.common.domain.FlinkVersion
-import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
-import javax.annotation.Nullable
+public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
 
-case class StopRequest(flinkVersion: FlinkVersion,
-                       executionMode: ExecutionMode,
-                       clusterId: String,
-                       jobId: String,
-                       withSavePoint: Boolean,
-                       withDrain: Boolean,
-                       customSavePointPath: String,
-                       kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-                       @Nullable dynamicOption: String ) {
-
+    /**
+     * @param clusterName
+     * @return
+     */
+    @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
+    FlinkCluster getByName(@Param("clusterName") String clusterName);
 }

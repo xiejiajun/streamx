@@ -31,18 +31,17 @@ import com.streamxhub.streamx.flink.packer.pipeline._
  *
  * @author czy006
  */
-class FlinkStandaloneBuildPipeline(params: FlinkStandaloneBuildRequest) extends BuildPipeline {
+class FlinkRemoteBuildPipeline(request: FlinkRemoteBuildRequest) extends BuildPipeline {
 
-  override def pipeType: PipeType = PipeType.FLINK_STANDALONE
+  override def pipeType: PipelineType = PipelineType.FLINK_STANDALONE
 
-  override def offerBuildParam: FlinkStandaloneBuildRequest = params
+  override def offerBuildParam: FlinkRemoteBuildRequest = request
 
   /**
    * The construction logic needs to be implemented by subclasses
    */
-  @throws[Throwable]
-  override protected def buildProcess(): FlinkStandaloneBuildResponse = {
-    val appName = BuildPipelineHelper.letAppNameSafe(params.appName)
+  @throws[Throwable] override protected def buildProcess(): ShadedBuildResponse = {
+    val appName = BuildPipelineHelper.getSafeAppName(request.appName)
 
     // create workspace.
     // the sub workspace path like: APP_WORKSPACE/jobName
@@ -53,24 +52,24 @@ class FlinkStandaloneBuildPipeline(params: FlinkStandaloneBuildRequest) extends 
       logInfo(s"recreate building workspace: $buildWorkspace")
       buildWorkspace
     }.getOrElse(throw getError.exception)
-
     // build flink job shaded jar
     val shadedJar =
-    execStep(2) {
-      val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
-      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
-      val flinkLibs = params.jarPackDeps.merge(providedLibs)
-      val output = MavenTool.buildFatJar(flinkLibs, shadedJarOutputPath)
-      logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
-      output
-    }.getOrElse(throw getError.exception)
+      execStep(2) {
+        val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(request)
+        val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
+        val flinkLibs = request.dependencyInfo.merge(providedLibs)
+        val output = MavenTool.buildFatJar(request.mainClass, flinkLibs, shadedJarOutputPath)
+        logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
+        output
+      }.getOrElse(throw getError.exception)
 
-    FlinkStandaloneBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
+    ShadedBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
   }
+
 }
 
-object FlinkStandaloneBuildPipeline{
-  def of(params: FlinkStandaloneBuildRequest): FlinkStandaloneBuildPipeline = new FlinkStandaloneBuildPipeline(params)
+object FlinkRemoteBuildPipeline {
+  def of(request: FlinkRemoteBuildRequest): FlinkRemoteBuildPipeline = new FlinkRemoteBuildPipeline(request)
 }
 
 

@@ -32,6 +32,8 @@ import com.streamxhub.streamx.flink.packer.maven.DependencyInfo
  */
 sealed trait BuildParam {
   def appName: String
+
+  def mainClass: String
 }
 
 sealed trait FlinkBuildParam extends BuildParam {
@@ -44,7 +46,7 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   def dependencyInfo: DependencyInfo
 
-  def customFlinkUsrJarPath: String
+  def customFlinkUserJarPath: String
 }
 
 sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
@@ -55,21 +57,23 @@ sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
 }
 
 case class FlinkK8sSessionBuildRequest(appName: String,
+                                       mainClass: String,
                                        executionMode: ExecutionMode,
                                        developmentMode: DevelopmentMode,
                                        flinkVersion: FlinkVersion,
                                        dependencyInfo: DependencyInfo,
-                                       customFlinkUsrJarPath: String,
+                                       customFlinkUserJarPath: String,
                                        clusterId: String,
                                        k8sNamespace: String
                                       ) extends FlinkK8sBuildParam
 
 case class FlinkK8sApplicationBuildRequest(appName: String,
+                                           mainClass: String,
                                            executionMode: ExecutionMode,
                                            developmentMode: DevelopmentMode,
                                            flinkVersion: FlinkVersion,
                                            dependencyInfo: DependencyInfo,
-                                           customFlinkUsrJarPath: String,
+                                           customFlinkUserJarPath: String,
                                            clusterId: String,
                                            k8sNamespace: String,
                                            flinkBaseImage: String,
@@ -78,14 +82,21 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                            dockerAuthConfig: DockerAuthConf
                                           ) extends FlinkK8sBuildParam
 
-case class FlinkStandaloneBuildRequest(appName: String,
-                                       executionMode: ExecutionMode,
-                                       developmentMode: DevelopmentMode,
-                                       flinkVersion: FlinkVersion,
-                                       jarPackDeps: JarPackDeps,
-                                       customFlinkUsrJarPath: String) extends FlinkBuildParam
+case class FlinkRemoteBuildRequest(appName: String,
+                                   mainClass: String,
+                                   executionMode: ExecutionMode,
+                                   developmentMode: DevelopmentMode,
+                                   flinkVersion: FlinkVersion,
+                                   dependencyInfo: DependencyInfo,
+                                   customFlinkUserJarPath: String) extends FlinkBuildParam
 
-// todo case class FlinkYarnApplicationBuildRequest() extends FlinkBuildParam
+
+case class FlinkYarnApplicationBuildRequest(appName: String,
+                                            mainClass: String,
+                                            localPath: String,
+                                            yarnProvidedPath: String,
+                                            developmentMode: DevelopmentMode,
+                                            dependencyInfo: DependencyInfo) extends BuildParam
 
 // todo case class FlinkYarnSessionBuildRequest() extends FlinkBuildParam
 
