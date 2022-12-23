@@ -636,6 +636,7 @@ object SqlSplitter {
     var singleLineComment = false
     var singleQuoteString = false
     var doubleQuoteString = false
+    var antiSlash = false
     var lineNum: Int = 0
     val lineNumMap = new collection.mutable.HashMap[Int, (Int, Int)]()
 
@@ -706,7 +707,7 @@ object SqlSplitter {
         // single quote start or end mark
         if (ch == '\'' && !(singleLineComment || multiLineComment)) {
           if (singleQuoteString) {
-            singleQuoteString = false
+            singleQuoteString = antiSlash
           } else if (!doubleQuoteString) {
             singleQuoteString = true
           }
@@ -715,10 +716,21 @@ object SqlSplitter {
         // double quote start or end mark
         if (ch == '"' && !(singleLineComment || multiLineComment)) {
           if (doubleQuoteString && idx > 0) {
-            doubleQuoteString = false
+            doubleQuoteString = antiSlash
           } else if (!singleQuoteString) {
             doubleQuoteString = true
           }
+        }
+
+        // refresh anti slash flag, whether the number of continuous anti slash is singular
+        antiSlash = if (ch == '\\') {
+          if (sql.charAt(idx - 1) != '\\') {
+            true
+          } else {
+            !antiSlash
+          }
+        } else {
+          false
         }
 
         // single line comment or multiple line comment start mark
